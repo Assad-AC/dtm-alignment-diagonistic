@@ -22,9 +22,68 @@ DEFAULT_STRUCTURAL_TYPES = [
 ]
 
 # ────────────────────────────────────────────────────────────
-# Internal helpers
+# Public utility — column resolver
 # ────────────────────────────────────────────────────────────
 
+# Patterns tried in order when the requested column isn't found.
+# Each is a regex matched against every column name in the dataframe.
+_FALLBACK_PATTERNS: List[str] = [
+    # any language variant: QuestionText(en), QuestionText(fr), …
+    r"QuestionText\(",
+    r"QuestionText",      # no parentheses at all
+    r"Question.*Text",    # looser: QuestionnaireText, etc.
+]
+
+
+def resolve_col(
+    requested: Optional[str],
+    df: pd.DataFrame,
+    df_label: str = "dataframe",
+    required: bool = True,
+) -> Optional[str]:
+    """
+    Return the best available column name for `requested`.
+
+    Resolution order:
+      1. Exact match                          → use as-is
+      2. Walk _FALLBACK_PATTERNS              → return first hit
+      3. required=True  → raise ValueError with available columns listed
+         required=False → return None silently
+
+    The returned value is always a real column name in `df`
+    (or None if not required and not found).
+    """
+    if requested is None:
+        return None
+
+    # 1. Exact match
+    if requested in df.columns:
+        return requested
+
+    # 2. Fallback patterns — only applied to QuestionText-style columns
+    #    so we don't accidentally resolve unrelated columns.
+    if re.search(r"QuestionText", requested, re.IGNORECASE):
+        for pattern in _FALLBACK_PATTERNS:
+            matches = [c for c in df.columns if re.search(
+                pattern, c, re.IGNORECASE)]
+            if matches:
+                # first match wins (typically alphabetical from Excel)
+                return matches[0]
+
+    # 3. Not found
+    if not required:
+        return None
+
+    available = ", ".join(f'"{c}"' for c in df.columns)
+    raise ValueError(
+        f'Column "{requested}" not found in {df_label}.\n'
+        f'Available columns: {available}'
+    )
+
+
+# ────────────────────────────────────────────────────────────
+# Internal helpers
+# ────────────────────────────────────────────────────────────
 
 def _safe(val) -> str:
     """Convert any value to a stripped string; NaN / None → ''."""
@@ -161,26 +220,22 @@ def match_surveys(
     use_comp_match = use_component and bool(formcomponents)
     use_missing_append = use_comp_match and bool(missing_question_category)
 
-    # ── column validation ────────────────────────────────────
-    def _check_col(col, df, df_label):
-        """Raise a clear ValueError if col is missing from df."""
-        if col is None:
-            return
-        if col not in df.columns:
-            available = ", ".join(f'"{c}"' for c in df.columns)
-            raise ValueError(
-                f'Column "{col}" not found in {df_label}.\n'
-                f'Available columns: {available}'
-            )
-
-    _check_col(df1_key_col,       df1, df1_name)
-    _check_col(df1_text_col,      df1, df1_name)
-    _check_col(df1_type_col,      df1, df1_name)
-    _check_col(df2_key_col,       df2, df2_name)
-    _check_col(df2_text_col,      df2, df2_name)
-    _check_col(df2_id_col,        df2, df2_name)
-    _check_col(df2_type_col,      df2, df2_name)
-    _check_col(df2_component_col, df2, df2_name)
+    # ── column resolution + validation ───────────────────────
+    # resolve_col() returns the exact column that will be used,
+    # falling back to language-variant alternatives for text cols.
+    df1_key_col = resolve_col(df1_key_col,       df1, df1_name, required=True)
+    df1_text_col = resolve_col(
+        df1_text_col,      df1, df1_name, required=False)
+    df1_type_col = resolve_col(
+        df1_type_col,      df1, df1_name, required=False)
+    df2_key_col = resolve_col(df2_key_col,       df2, df2_name, required=True)
+    df2_text_col = resolve_col(
+        df2_text_col,      df2, df2_name, required=False)
+    df2_id_col = resolve_col(df2_id_col,        df2, df2_name, required=False)
+    df2_type_col = resolve_col(
+        df2_type_col,      df2, df2_name, required=False)
+    df2_component_col = resolve_col(
+        df2_component_col, df2, df2_name, required=False)
 
     # ── vectorise inputs ─────────────────────────────────────
     keys1 = [_safe(v) for v in df1[df1_key_col]]

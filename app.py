@@ -14,7 +14,7 @@ import streamlit as st
 
 from config import (PAGE_CONFIG, DEFAULTS, STATUS_COLOURS_HEX,
                     STATUS_FONT_HEX, STATUS_EMOJI, inject_css)
-from matcher import match_surveys
+from matcher import match_surveys, resolve_col
 from exporter import export_alignment_excel
 
 # ────────────────────────────────────────────────────────────
@@ -236,6 +236,27 @@ if run_clicked:
         except Exception as exc:
             st.error(f"❌ Could not read Datakit: {exc}")
             st.stop()
+
+    # ── Resolve text columns (handles language variants) ─────
+    # e.g. QuestionText(en) → QuestionText(fr) when only French exists
+    _resolved_dk_text = resolve_col(
+        df2_text_col or None, dk_df, "Datakit", required=False)
+    _resolved_survey_text = resolve_col(
+        df1_text_col or None, survey_df, "survey", required=False)
+
+    if df2_text_col and _resolved_dk_text and _resolved_dk_text != df2_text_col:
+        st.warning(
+            f'⚠️ Datakit text column **"{df2_text_col}"** not found — '
+            f'using **"{_resolved_dk_text}"** instead. '
+            f'You can update the configured name in **Column mappings** in the sidebar.',
+            icon=None,
+        )
+    if df1_text_col and _resolved_survey_text and _resolved_survey_text != df1_text_col:
+        st.warning(
+            f'⚠️ Survey text column **"{df1_text_col}"** not found — '
+            f'using **"{_resolved_survey_text}"** instead.',
+            icon=None,
+        )
 
     # Run matching
     progress_bar = st.progress(0, text="Starting…")
