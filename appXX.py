@@ -163,48 +163,6 @@ with col_run:
         disabled=(survey_file is None),
     )
 
-# ── Column preview (shown once files are loaded) ─────────────
-if survey_file is not None or not use_default_dk and uploaded_dk is not None:
-    with st.expander("🔎 Preview column names — check before running", expanded=False):
-        prev_col1, prev_col2 = st.columns(2)
-
-        with prev_col1:
-            st.markdown("**Survey form columns**")
-            if survey_file is not None:
-                try:
-                    _prev_survey = pd.read_excel(
-                        survey_file, sheet_name=survey_sheet, nrows=0)
-                    # reset so the main run can re-read it
-                    survey_file.seek(0)
-                    st.dataframe(
-                        pd.DataFrame(
-                            {"Column name": _prev_survey.columns.tolist()}),
-                        use_container_width=True, hide_index=True, height=220,
-                    )
-                except Exception as e:
-                    st.warning(f"Could not preview: {e}")
-            else:
-                st.caption("Upload a survey file to preview.")
-
-        with prev_col2:
-            st.markdown("**Datakit columns**")
-            _dk_src = DEFAULT_DATAKIT_PATH if use_default_dk else uploaded_dk
-            if _dk_src is not None:
-                try:
-                    _prev_dk = pd.read_excel(
-                        _dk_src, sheet_name=datakit_sheet, nrows=0)
-                    if hasattr(_dk_src, "seek"):
-                        _dk_src.seek(0)
-                    st.dataframe(
-                        pd.DataFrame(
-                            {"Column name": _prev_dk.columns.tolist()}),
-                        use_container_width=True, hide_index=True, height=220,
-                    )
-                except Exception as e:
-                    st.warning(f"Could not preview: {e}")
-            else:
-                st.caption("Upload or enable stored Datakit to preview.")
-
 
 # ────────────────────────────────────────────────────────────
 # Execution logic
@@ -264,8 +222,7 @@ if run_clicked:
         )
     except Exception as exc:
         progress_bar.empty()
-        st.error(f"❌ Matching failed:\n\n```\n{exc}\n```")
-        st.caption("💡 Open the **Preview column names** panel above to check exact column names, then update **Column mappings** in the sidebar.")
+        st.error(f"❌ Matching failed: {exc}")
         st.stop()
 
     # Generate Excel in memory

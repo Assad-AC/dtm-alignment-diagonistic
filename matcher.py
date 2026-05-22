@@ -161,6 +161,27 @@ def match_surveys(
     use_comp_match = use_component and bool(formcomponents)
     use_missing_append = use_comp_match and bool(missing_question_category)
 
+    # ── column validation ────────────────────────────────────
+    def _check_col(col, df, df_label):
+        """Raise a clear ValueError if col is missing from df."""
+        if col is None:
+            return
+        if col not in df.columns:
+            available = ", ".join(f'"{c}"' for c in df.columns)
+            raise ValueError(
+                f'Column "{col}" not found in {df_label}.\n'
+                f'Available columns: {available}'
+            )
+
+    _check_col(df1_key_col,       df1, df1_name)
+    _check_col(df1_text_col,      df1, df1_name)
+    _check_col(df1_type_col,      df1, df1_name)
+    _check_col(df2_key_col,       df2, df2_name)
+    _check_col(df2_text_col,      df2, df2_name)
+    _check_col(df2_id_col,        df2, df2_name)
+    _check_col(df2_type_col,      df2, df2_name)
+    _check_col(df2_component_col, df2, df2_name)
+
     # ── vectorise inputs ─────────────────────────────────────
     keys1 = [_safe(v) for v in df1[df1_key_col]]
     keys2 = [_safe(v) for v in df2[df2_key_col]]

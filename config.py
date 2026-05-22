@@ -78,179 +78,255 @@ STATUS_EMOJI = {
 # ────────────────────────────────────────────────────────────
 
 CUSTOM_CSS = """
-/* ── Brand colours ───────────────────────────────────────── */
-:root {
-    --dtm-dark-blue:  #1F3864;
-    --dtm-mid-blue:   #2E5797;
-    --dtm-light-blue: #D6E4F7;
-    --dtm-grey:       #F5F5F5;
-    --dtm-border:     #DEE2E6;
-    --dtm-text:       #212529;
-    --dtm-muted:      #6C757D;
-}
+/* ═══════════════════════════════════════════════════════════
+   DTM Survey Alignment Tool — stylesheet
+   All colours are hardcoded hex (no CSS variables) so they
+   survive Streamlit Cloud's theme injection reliably.
+   ═══════════════════════════════════════════════════════════ */
 
 /* ── App header ──────────────────────────────────────────── */
 .dtm-title {
-    color: var(--dtm-dark-blue);
+    color: #1F3864;
     font-size: 1.85rem;
     font-weight: 700;
-    margin-bottom: 0.1rem;
     line-height: 1.2;
+    margin-bottom: 0.1rem;
 }
 .dtm-sub {
-    color: var(--dtm-muted);
+    color: #555555;
     font-size: 0.88rem;
     margin-top: 0.1rem;
     margin-bottom: 0;
 }
 
-/* ── Sidebar ─────────────────────────────────────────────── */
+/* ── Sidebar background ──────────────────────────────────── */
 [data-testid="stSidebar"] {
-    background-color: #F8FAFD;
-    border-right: 1px solid var(--dtm-border);
+    background-color: #F0F4FA !important;
+    border-right: 1px solid #CBD5E1;
 }
-[data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 {
-    color: var(--dtm-dark-blue);
-}
-.sidebar-section {
-    font-weight: 600;
-    color: var(--dtm-dark-blue);
-    font-size: 0.92rem;
-    letter-spacing: 0.01em;
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
+[data-testid="stSidebar"] > div:first-child {
+    background-color: #F0F4FA !important;
 }
 
-/* ── Metric cards ────────────────────────────────────────── */
+/* ── ALL text inside the sidebar — force dark ────────────── */
+/* This is the main fix: Streamlit Cloud can render labels
+   as near-white if not explicitly overridden.              */
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] h4,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] small,
+[data-testid="stSidebar"] div {
+    color: #1A1A2E !important;
+}
+
+/* Widget labels specifically */
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p,
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] span,
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] label {
+    color: #1A1A2E !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+}
+
+/* Caption / help text */
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
+[data-testid="stSidebar"] small {
+    color: #4A5568 !important;
+    font-size: 0.78rem !important;
+}
+
+/* Slider value label */
+[data-testid="stSidebar"] [data-testid="stSlider"] p,
+[data-testid="stSidebar"] [data-testid="stSlider"] span {
+    color: #1A1A2E !important;
+}
+
+/* Toggle label */
+[data-testid="stSidebar"] [data-testid="stToggle"] p,
+[data-testid="stSidebar"] [data-testid="stToggle"] span:not([data-baseweb]) {
+    color: #1A1A2E !important;
+}
+
+/* Text input — label + input field */
+[data-testid="stSidebar"] [data-testid="stTextInput"] label,
+[data-testid="stSidebar"] [data-testid="stTextInput"] p {
+    color: #1A1A2E !important;
+    font-weight: 500 !important;
+}
+[data-testid="stSidebar"] [data-testid="stTextInput"] input {
+    background-color: #FFFFFF !important;
+    color: #1A1A2E !important;
+    border: 1px solid #94A3B8 !important;
+    border-radius: 4px;
+    font-size: 0.86rem;
+}
+[data-testid="stSidebar"] [data-testid="stTextInput"] input:focus {
+    border-color: #2E5797 !important;
+    box-shadow: 0 0 0 2px rgba(46, 87, 151, 0.18) !important;
+}
+
+/* Info / alert boxes inside sidebar */
+[data-testid="stSidebar"] [data-testid="stAlert"] p,
+[data-testid="stSidebar"] [data-testid="stAlert"] span {
+    color: #1A1A2E !important;
+}
+
+/* ── Sidebar section headers (.sidebar-section class) ─────── */
+.sidebar-section {
+    color: #1F3864 !important;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+    margin-bottom: 0.3rem;
+    padding-bottom: 0.2rem;
+    border-bottom: 2px solid #2E5797;
+    display: block;
+}
+
+/* ── Expander (sidebar) ──────────────────────────────────── */
+[data-testid="stSidebar"] [data-testid="stExpander"] summary {
+    color: #1F3864 !important;
+    font-weight: 600;
+    font-size: 0.86rem;
+    background-color: #E2ECF8;
+    border-radius: 4px;
+    padding: 0.3rem 0.5rem;
+}
+[data-testid="stSidebar"] [data-testid="stExpander"] summary:hover {
+    background-color: #D0E0F4;
+}
+[data-testid="stSidebar"] [data-testid="stExpander"] summary p,
+[data-testid="stSidebar"] [data-testid="stExpander"] summary span {
+    color: #1F3864 !important;
+}
+[data-testid="stSidebar"] [data-testid="stExpander"] [data-testid="stVerticalBlock"] p,
+[data-testid="stSidebar"] [data-testid="stExpander"] [data-testid="stVerticalBlock"] label,
+[data-testid="stSidebar"] [data-testid="stExpander"] [data-testid="stVerticalBlock"] span {
+    color: #1A1A2E !important;
+}
+
+/* ── Divider ─────────────────────────────────────────────── */
+[data-testid="stSidebar"] hr {
+    border: none;
+    border-top: 1px solid #CBD5E1;
+    margin: 0.75rem 0;
+}
+
+/* ── Slider track + thumb ────────────────────────────────── */
+[data-testid="stSlider"] [data-baseweb="slider"] [data-testid="stThumbValue"] {
+    color: #1F3864 !important;
+    background-color: #D6E4F7 !important;
+}
+[data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"] {
+    background-color: #2E5797 !important;
+    border-color: #1F3864 !important;
+}
+
+/* ── Toggle active colour ────────────────────────────────── */
+[data-baseweb="toggle"] div[data-checked="true"] {
+    background-color: #2E5797 !important;
+}
+
+/* ── MAIN AREA — metric cards ────────────────────────────── */
 div[data-testid="metric-container"] {
     background-color: #FFFFFF;
-    border: 1px solid var(--dtm-border);
-    border-left: 4px solid var(--dtm-mid-blue);
+    border: 1px solid #CBD5E1;
+    border-left: 4px solid #2E5797;
     border-radius: 6px;
     padding: 0.7rem 0.9rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
 }
-div[data-testid="metric-container"] label {
+div[data-testid="metric-container"] label,
+div[data-testid="metric-container"] [data-testid="stMetricLabel"] p {
     font-size: 0.78rem !important;
-    color: var(--dtm-muted) !important;
-    font-weight: 500;
+    color: #555555 !important;
+    font-weight: 500 !important;
 }
 div[data-testid="metric-container"] [data-testid="stMetricValue"] {
-    font-size: 1.6rem !important;
-    font-weight: 700;
-    color: var(--dtm-dark-blue);
+    font-size: 1.55rem !important;
+    font-weight: 700 !important;
+    color: #1F3864 !important;
 }
 
 /* ── Primary button (Run) ────────────────────────────────── */
 div[data-testid="stButton"] > button[kind="primary"] {
-    background-color: var(--dtm-dark-blue);
-    color: #FFFFFF;
-    border: none;
+    background-color: #1F3864 !important;
+    color: #FFFFFF !important;
+    border: none !important;
     border-radius: 6px;
     font-weight: 600;
-    padding: 0.55rem 1.2rem;
-    transition: background-color 0.2s ease;
+    letter-spacing: 0.02em;
+    transition: background-color 0.18s ease;
 }
 div[data-testid="stButton"] > button[kind="primary"]:hover {
-    background-color: var(--dtm-mid-blue);
-    color: #FFFFFF;
+    background-color: #2E5797 !important;
 }
 div[data-testid="stButton"] > button[kind="primary"]:disabled {
-    background-color: #B0BEC5;
-    color: #ECEFF1;
+    background-color: #94A3B8 !important;
+    color: #E2E8F0 !important;
 }
 
 /* ── Download button ─────────────────────────────────────── */
 div[data-testid="stDownloadButton"] > button {
-    background-color: var(--dtm-dark-blue);
-    color: #FFFFFF;
-    border: none;
+    background-color: #1F3864 !important;
+    color: #FFFFFF !important;
+    border: none !important;
     border-radius: 6px;
     font-weight: 600;
     width: 100%;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.18s ease;
 }
 div[data-testid="stDownloadButton"] > button:hover {
-    background-color: var(--dtm-mid-blue);
-    color: #FFFFFF;
+    background-color: #2E5797 !important;
 }
 
 /* ── File uploader ───────────────────────────────────────── */
-[data-testid="stFileUploader"] {
-    border: 1.5px dashed var(--dtm-mid-blue);
-    border-radius: 6px;
-    padding: 0.4rem 0.6rem;
-    background-color: #F8FAFD;
+[data-testid="stFileUploaderDropzone"] {
+    border: 1.5px dashed #2E5797 !important;
+    border-radius: 6px !important;
+    background-color: #F8FAFD !important;
 }
-[data-testid="stFileUploader"]:hover {
-    border-color: var(--dtm-dark-blue);
-    background-color: var(--dtm-light-blue);
+[data-testid="stFileUploaderDropzone"]:hover {
+    border-color: #1F3864 !important;
+    background-color: #D6E4F7 !important;
 }
-
-/* ── Section divider ─────────────────────────────────────── */
-hr {
-    border: none;
-    border-top: 1px solid var(--dtm-border);
-    margin: 1rem 0;
+[data-testid="stFileUploaderDropzone"] span,
+[data-testid="stFileUploaderDropzone"] p,
+[data-testid="stFileUploaderDropzone"] small {
+    color: #2E5797 !important;
 }
 
-/* ── Expander ────────────────────────────────────────────── */
-[data-testid="stExpander"] summary {
+/* ── Main area text inputs ───────────────────────────────── */
+[data-testid="stTextInput"] input {
+    color: #1A1A2E;
+    border-radius: 4px;
     font-size: 0.88rem;
-    font-weight: 500;
-    color: var(--dtm-mid-blue);
 }
-[data-testid="stExpander"] summary:hover {
-    color: var(--dtm-dark-blue);
+[data-testid="stTextInput"] input:focus {
+    border-color: #2E5797;
+    box-shadow: 0 0 0 2px rgba(46, 87, 151, 0.15);
 }
 
-/* ── Dataframe header ────────────────────────────────────── */
+/* ── Progress bar ────────────────────────────────────────── */
+[data-testid="stProgressBar"] > div > div {
+    background-color: #2E5797 !important;
+}
+
+/* ── Dataframe ───────────────────────────────────────────── */
 [data-testid="stDataFrame"] th {
-    background-color: var(--dtm-dark-blue) !important;
+    background-color: #1F3864 !important;
     color: #FFFFFF !important;
     font-weight: 600;
     font-size: 0.82rem;
 }
 
-/* ── Progress bar ────────────────────────────────────────── */
-[data-testid="stProgressBar"] > div > div {
-    background-color: var(--dtm-mid-blue);
-}
-
-/* ── Success / info / error banners ─────────────────────── */
-[data-testid="stAlert"][data-baseweb="notification"][kind="positive"] {
-    border-left: 4px solid #375623;
-    background-color: #C6EFCE44;
-}
-[data-testid="stAlert"][data-baseweb="notification"][kind="info"] {
-    border-left: 4px solid var(--dtm-mid-blue);
-    background-color: var(--dtm-light-blue);
-}
-
-/* ── Toggle / checkbox ───────────────────────────────────── */
-[data-testid="stToggle"] span[data-checked="true"] {
-    background-color: var(--dtm-mid-blue) !important;
-}
-
-/* ── Text inputs ─────────────────────────────────────────── */
-[data-testid="stTextInput"] input {
-    border-radius: 4px;
-    border-color: var(--dtm-border);
-    font-size: 0.88rem;
-}
-[data-testid="stTextInput"] input:focus {
-    border-color: var(--dtm-mid-blue);
-    box-shadow: 0 0 0 2px rgba(46, 87, 151, 0.15);
-}
-
-/* ── Slider ──────────────────────────────────────────────── */
-[data-testid="stSlider"] [data-baseweb="slider"] [role="slider"] {
-    background-color: var(--dtm-mid-blue);
-}
-
-/* ── Hide Streamlit branding ─────────────────────────────── */
+/* ── Hide Streamlit chrome ───────────────────────────────── */
 #MainMenu { visibility: hidden; }
 footer    { visibility: hidden; }
 header    { visibility: hidden; }
