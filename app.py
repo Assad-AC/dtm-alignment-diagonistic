@@ -14,7 +14,7 @@ import streamlit as st
 
 from config import (PAGE_CONFIG, DEFAULTS, STATUS_COLOURS_HEX,
                     STATUS_FONT_HEX, STATUS_EMOJI, inject_css)
-from matcher import match_surveys, resolve_col
+from matcher import STRING_DISTANCE_SCORERS, match_surveys, resolve_col
 from exporter import export_alignment_excel
 
 # ────────────────────────────────────────────────────────────
@@ -94,14 +94,14 @@ with st.sidebar:
     )
 
     fuzzy_threshold = st.slider(
-        "Fuzzy threshold (JW distance)",
+        "Fuzzy threshold (Jaro distance)",
         min_value=0.05,
         max_value=0.40,
         value=DEFAULTS["fuzzy_threshold"],
         step=0.01,
         help=(
-            "Jaro-Winkler *distance* threshold.  \n"
-            "Lower = stricter.  Default 0.20 ≈ ≥80% similarity."
+            "Jaro *distance* threshold. \n"
+            "Lower = stricter. Default 0.20 is roughly >= 80% similarity."
         ),
     )
 

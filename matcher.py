@@ -9,7 +9,7 @@ from typing import Callable, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 from rapidfuzz import process as rf_process
-from rapidfuzz.distance import JaroWinkler
+from rapidfuzz.distance import Jaro, JaroWinkler
 
 # ────────────────────────────────────────────────────────────
 # Defaults
@@ -20,6 +20,11 @@ DEFAULT_STRUCTURAL_TYPES = [
     "end_repeat", "end_group", "note", "text", "trigger",
     "start", "end", "today",
 ]
+
+STRING_DISTANCE_SCORERS: Dict[str, Callable] = {
+    "Jaro-Winkler": JaroWinkler.distance,
+    "Jaro": Jaro.distance,
+}
 
 # ────────────────────────────────────────────────────────────
 # Public utility — column resolver
@@ -183,6 +188,7 @@ def match_surveys(
     formcomponents=None,   # e.g. "Baseline Sub-Area Assessment"
     question_category=None,   # e.g. "Core"  (informational only)
     missing_question_category=None,   # e.g. ["Core"]
+    string_distance_algorithm: str = "Jaro-Winkler",
     component_match_components=None,   # additional names for ComponentMatch check
     # ── progress callback ────────────────────────────────────
     progress_cb=None,   # callable(msg: str, pct: float)
@@ -191,7 +197,7 @@ def match_surveys(
     Match df1 (survey form) against df2 (Global Data Kit) in three stages:
       1. Exact key-field match
       2. Exact text-field match
-      3. Fuzzy (Jaro-Winkler) key / text match
+      3. Fuzzy key / text match using the selected string distance algorithm
 
     Returns df1 with appended diagnostic columns plus any missing-core
     df2 rows appended at the bottom (AlignmentStatus = "Missing*Question").
@@ -201,6 +207,9 @@ def match_surveys(
     if structural_types is None:
         structural_types = DEFAULT_STRUCTURAL_TYPES
     struct_set = {s.lower() for s in structural_types}
+    string_distance_scorer = STRING_DISTANCE_SCORERS[
+        string_distance_algorithm
+    ]
 
     def _nonnull(x):
         return x if x else None
@@ -313,8 +322,9 @@ def match_surveys(
             best_k = None
             if k1 and valid_k2_val:
                 hit = rf_process.extractOne(
-                    k1, valid_k2_val,
-                    scorer=JaroWinkler.distance,
+                    k1,
+                    valid_k2_val,
+                    scorer=string_distance_scorer,
                     score_cutoff=fuzzy_threshold,
                 )
                 # hit = (choice, distance, index_into_valid_k2_val) or None
@@ -325,8 +335,9 @@ def match_surveys(
             best_t = None
             if t1 and valid_t2_val:
                 hit = rf_process.extractOne(
-                    t1, valid_t2_val,
-                    scorer=JaroWinkler.distance,
+                    t1,
+                    valid_t2_val,
+                    scorer=string_distance_scorer,
                     score_cutoff=fuzzy_threshold,
                 )
                 if hit and hit[1] < fuzzy_threshold:
