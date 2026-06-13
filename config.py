@@ -329,7 +329,6 @@ div[data-testid="stDownloadButton"] > button:hover {
 /* ── Hide Streamlit chrome ───────────────────────────────── */
 #MainMenu { visibility: hidden; }
 footer    { visibility: hidden; }
-header    { visibility: hidden; }
 """
 
 
